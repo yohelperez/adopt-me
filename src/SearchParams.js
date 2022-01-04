@@ -4,6 +4,34 @@ import Results from "./Results";
 import ThemeContext from "./ThemeContext";
 
 const ANIMALS = ["bird", "cat", "dog", "rabbit", "reptile"];
+const ALPHABET = [
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I",
+  "J",
+  "K",
+  "L",
+  "M",
+  "N",
+  "O",
+  "P",
+  "Q",
+  "R",
+  "S",
+  "T",
+  "U",
+  "V",
+  "W",
+  "X",
+  "Y",
+  "Z",
+];
 
 const SearchParams = () => {
   const [animal, updateAnimal] = useState("");
@@ -12,6 +40,7 @@ const SearchParams = () => {
   const [pets, setPets] = useState([]);
   const [breeds] = useBreedList(animal);
   const [theme] = useContext(ThemeContext);
+  const [letter, updateLetter] = useState("");
 
   useEffect(() => {
     requestPets();
@@ -22,6 +51,19 @@ const SearchParams = () => {
       `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`
     );
     const json = await res.json();
+
+    if (letter != "") {
+      //while to search the animals whose name start with a particular letter
+      let i = 0;
+      while (i < json.pets.length) {
+        let pet = json.pets[i];
+        if (pet.name[0] != letter) {
+          json.pets.splice(i, 1); //removes records that don't match
+          i--;
+        }
+        i++;
+      }
+    }
 
     setPets(json.pets);
   }
@@ -77,7 +119,23 @@ const SearchParams = () => {
           </select>
         </label>
 
-        
+        <label htmlFor="Letter">
+          Letter
+          <select
+            disabled={!breeds.length}
+            id="letter"
+            onChange={(e) => updateLetter(e.target.value)}
+            onBlur={(e) => updateLetter(e.target.value)}
+          >
+            <option />
+            {ALPHABET.map((sletter) => (
+              <option key={sletter} value={sletter}>
+                {sletter}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <button style={{ backgroundColor: theme }}>Submit</button>
       </form>
       <Results pets={pets} />
